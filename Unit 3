@@ -1,0 +1,146 @@
+-- Cliente
+
+CREATE TABLE "Cliente" (
+"Nit" INTEGER NOT NULL UNIQUE,
+"Nombre" TEXT NOT NULL,
+"Apellido" TEXT NOT NULL,
+"Direccion" TEXT NOT NULL,
+"Telefono" TEXT NOT NULL,
+"Ciudad" TEXT NOT NULL,
+PRIMARY KEY("Nit" AUTOINCREMENT)
+)
+
+INSERT INTO Cliente VALUES 
+   (NULL, "Luis", "Pérez", "Cra 5 N. 6-98", "123456", "Cúcuta"),
+   (NULL, "Blanca", "Guerrero", "Calle 10 N. 5-89", "789654", "Cajamarca"),
+   (NULL, "Adriana", "Castro", "Av. 102 N. 2-02", "963258", "Cali"),
+   (NULL, "Martina", "López", "Cra. 41 N .5-98", "741258", "Armenia"),
+   (NULL, "Lucas", "Serna", "Calle 11 N 9-09", "789123", "Cali");
+
+   
+-- Producto
+
+CREATE TABLE "Producto" (
+"CodAlgodon" TEXT NOT NULL UNIQUE,
+"NomAlgodon" TEXT,
+"Precio" NUMERIC,
+PRIMARY KEY("CodAlgodon")
+)
+
+INSERT INTO Producto VALUES 
+ ("A01", "Algodón reciclaje", 1500),
+ ("A02", "Algodón indio", 5000),
+ ("A03", "Algodón americano", 3000),
+ ("A04", "Algodón egipcio", 4500);
+
+
+
+ -- Conductor
+ 
+ CREATE TABLE "Conductor" (
+"Id" TEXT NOT NULL UNIQUE,
+"Nombre" TEXT NOT NULL,
+"Apellido" TEXT NOT NULL,
+"NumCamion" TEXT NOT NULL,
+PRIMARY KEY("Id")
+);
+
+INSERT INTO Conductor VALUES 
+   ("C1", "Luchito", "Luchas", "752"),
+   ("C2", "Michi", "Sancio", "967"),
+   ("C3", "Ela", "Mor", "714");
+
+
+
+
+
+   -- Despacho
+   
+ CREATE TABLE "Despacho" (
+"Destino" INTEGER NOT NULL UNIQUE,
+"Fecha" TEXT NOT NULL,
+"Peso" NUMERIC NOT NULL,
+"NitCliente" INTEGER,
+"CodigoAlgodon" INTEGER,
+FOREIGN KEY("NitCliente") REFERENCES "Cliente"("Nit"),
+FOREIGN KEY("CodigoAlgodon") REFERENCES "Producto"("CodAlgodon"),
+PRIMARY KEY("Destino" AUTOINCREMENT)
+);
+
+ INSERT INTO Despacho VALUES 
+(NULL, "11/02/2019", 102,  1, "A03"),
+(NULL, "15/03/2019", 452, 3, "A02"),
+(NULL, "25/10/2019", 122,  2, "A02"),
+(NULL, "02/12/2019", 113, 5, "A01"),
+(NULL, "17/11/2020", 297, 4, "A03"),
+(NULL, "02/06/2021", 504, 2, "A04"),
+(NULL, "03/09/2021", 205,  4, "A04"),
+(NULL, "30/04/2022", 115,  4, "A03"),
+(NULL, "14/08/2022", 118, 1, "A01");
+ 
+ 
+ -- Transportadora
+ 
+ CREATE TABLE "Transportadora" (
+"IdRuta" INTEGER NOT NULL UNIQUE,
+"IdCond" INTEGER,
+"IdDesp" INTEGER,
+FOREIGN KEY("IdCond") REFERENCES "Conductor"("Id"),
+FOREIGN KEY("IdDesp") REFERENCES "Despacho"("Destino"),
+PRIMARY KEY("IdRuta" AUTOINCREMENT)
+);
+
+
+INSERT INTO Transportadora VALUES
+  (NULL, "C2", 2),
+  (NULL, "C3", 3),
+  (NULL, "C1", 4),
+  (NULL, "C2", 5),
+  (NULL, "C1", 7),
+  (NULL, "C2", 9),
+  (NULL, "C3", 8);
+  
+  -- consultas 
+  
+  SELECT SUM (Peso) 
+  AS "Cantidad despachado 2019"
+  FROM Despacho
+  WHERE Fecha like "%2019";
+  
+  
+  SELECT CodigoAlgodon, SUM (Peso)
+  AS "Algodón más vendido"
+  FROM Despacho
+  GROUP BY CodigoAlgodon
+  ORDER BY "Venta Mayor" DESC LIMIT 1;
+  
+  
+  SELECT Ciudad, count (Destino) 
+  AS "Ciudad con más despachos"
+  FROM Despacho, Cliente
+  WHERE Nit = NitCliente
+  GROUP BY Ciudad
+  ORDER BY "Ciudad mas despachada" ASC LIMIT 1;
+  
+
+  SELECT Id, Nombre, Apellido, sum (IdRuta)
+  AS "Conductor más frecuente"
+  FROM Conductor, Transportadora
+  WHERE Id = IdCond;
+  
+ 
+  SELECT * FROM Cliente
+  WHERE Ciudad LIKE "Cali";
+  
+  
+  SELECT Ciudad, COUNT (Destino)
+  AS "Ciudad mas algodón reciclado"
+  FROM Despacho, Cliente, Producto
+  WHERE Nit = NitCliente and CodAlgodon = CodigoAlgodon AND CodAlgodon = "A01"
+  GROUP BY Ciudad
+  ORDER BY "Ciudad con reciclado" ASC LIMIT 1;
+
+  
+  ALTER TABLE Conductor add COLUMN "Alias" TEXT;
+  
+  UPDATE producto SET precio = (precio*0.07);
